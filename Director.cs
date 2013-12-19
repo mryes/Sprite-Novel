@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpriteNovel
 {
@@ -22,9 +23,24 @@ namespace SpriteNovel
 		public Script CurrentScript
 			{ get { return scriptTree.script; } }
 
-		Stack<int> plannedChoices = new Stack<int>();
+		public List<string> Choices
+		{
+			get 
+			{
+				if (CurrentAdvancement >= CurrentScript.Count-1)
+					return (scriptTree.Paths.Select(n => n.choice).ToList());
+				else return new List<string>();
+			}
+		}
+		public bool AtChoicePoint()
+		{
+			return Choices.Count > 0;
+		}
+
+		Queue<int> plannedChoices = new Queue<int>();
 		public void PlanChoice(int choice)
-			{ plannedChoices.Push(choice); }
+			{ plannedChoices.Enqueue(choice); }
+
 
 		public Director(ScriptTree s)
 		{ 
@@ -42,7 +58,8 @@ namespace SpriteNovel
 		{
 			CurrentAdvancement = advancement;
 			DirectorStatus status = CheckAgainstBounds();
-			while (status == DirectorStatus.PendingChoice)
+			while ((status == DirectorStatus.PendingChoice)
+				&& (plannedChoices.Count > 0))
 			{
 				TakeChoice();
 				status = CheckAgainstBounds();
@@ -50,18 +67,14 @@ namespace SpriteNovel
 			UpdateDirectives();
 			return status;
 		}
-		
-		string[] persistingDirectives = 
-		{ 
-			"music" 
-		};
+
 
 		void TakeChoice()
 		{
-
-			if (plannedChoices.Peek() < scriptTree.Paths.Count)
+			if  ((plannedChoices.Count > 0)
+				&& (plannedChoices.Peek() < scriptTree.Paths.Count))
 			{
-				int choice = plannedChoices.Pop();
+				int choice = plannedChoices.Dequeue();
 				if (CurrentAdvancement >= CurrentScript.Count)
 					CurrentAdvancement -= CurrentScript.Count;
 				scriptTree = scriptTree.Paths[choice].tree;
@@ -100,6 +113,7 @@ namespace SpriteNovel
 			return DirectorStatus.Success;
 		}
 
+		string[] persistingDirectives = { "music" };
 		void CopyPersistingDirectives()
 		{
 			var directiveNames = new List<string>();

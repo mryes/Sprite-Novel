@@ -8,7 +8,7 @@ namespace SpriteNovel
 	{
 		static void Main()
 		{
-			Script scriptRoot = Script.Parse("n  music=lovely  \"Hello. What do you want to do today?\"");
+			Script scriptRoot = Script.Parse("n  music=lovely  \"Hello. What do you want to do today?\" n \"Shit on people?\"");
 			Script scriptA    = Script.Parse("n \"You want to run? Okay, let's run.\"");
 			Script scriptB    = Script.Parse("n \"Yeah? Just walking? That's fine. What do you want to eat?\"");
 			Script scriptBA   = Script.Parse("n \"I'm tasty.\"");
@@ -27,14 +27,16 @@ namespace SpriteNovel
 
 			Director directorTest = new Director(scriptTreeRoot);
 
-			directorTest.PlanChoice(0);
-			directorTest.PlanChoice(1);
-
 			do
 			{
 				foreach (var dir in directorTest.CurrentDirectives)
 					Console.Write(String.Format("{0}={1} ", dir.name, dir.value));
+				foreach(string option in directorTest.Choices)
+					Console.WriteLine(option);
 				Console.WriteLine();
+				string input = Console.ReadLine();
+				if (directorTest.AtChoicePoint())
+					directorTest.PlanChoice(Convert.ToInt32(input));
 
 			} while (directorTest.Advance() != DirectorStatus.EndOfScripts);
 		}
