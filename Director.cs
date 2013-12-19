@@ -18,7 +18,7 @@ namespace SpriteNovel
 				if (advNumber >= script.Count)
 					advNumber = script.Count-1;
 
-				CurrentDirectives.Clear();
+				CurrentDirectives = new List<AdvancementDirective>();
 				CurrentDirectives = script[advNumber].directives;
 				CurrentDirectives.Add(new AdvancementDirective 
 					{ name = "dialogue", value = script[advNumber].dialogue });
@@ -39,7 +39,7 @@ namespace SpriteNovel
 			}
 		}
 
-		public Director(Script s) 
+		public Director(Script s)
 		{ 
 			script = s;
 			CurrentAdvancement = 0;
@@ -55,9 +55,13 @@ namespace SpriteNovel
 		string LastValueOfDirective(string directiveName)
 		{
 			for (int i = CurrentAdvancement; i >= 0; --i)
+			{
 				foreach (var dir in script[i].directives)
+				{
 					if (dir.name == directiveName)
 						return dir.value;
+				}
+			}
 			return "";
 		}
 	}
