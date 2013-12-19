@@ -74,9 +74,8 @@ namespace SpriteNovel
 			var script = new Script();
 			foreach (string str in advStrings)
 			{
-				Console.WriteLine(str);
 				Advancement adv = Advancement.Parse(str);
-                script.Add(adv);
+				script.Add(adv);
 			}
 
 			return script;

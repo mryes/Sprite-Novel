@@ -5,7 +5,8 @@ namespace SpriteNovel
 {
 	class Director
 	{
-		public List<AdvancementDirective> CurrentDirectives;
+		public List<AdvancementDirective> CurrentDirectives 
+			= new List<AdvancementDirective>();
 
 		int advNumber;
 		public int CurrentAdvancement
@@ -14,10 +15,13 @@ namespace SpriteNovel
 			set
 			{
 				advNumber = value;
+				if (advNumber >= script.Count)
+					advNumber = script.Count-1;
+
 				CurrentDirectives.Clear();
-				CurrentDirectives = script[value].directives;
+				CurrentDirectives = script[advNumber].directives;
 				CurrentDirectives.Add(new AdvancementDirective 
-					{ name = "dialogue", value = script[value].dialogue });
+					{ name = "dialogue", value = script[advNumber].dialogue });
 
 				var directiveNames = new List<string>();
 				foreach (var curDir in CurrentDirectives)
@@ -35,7 +39,11 @@ namespace SpriteNovel
 			}
 		}
 
-		public Director(Script s) { script = s; }
+		public Director(Script s) 
+		{ 
+			script = s;
+			CurrentAdvancement = 0;
+		}
 
 		Script script;
 
