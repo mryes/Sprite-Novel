@@ -13,50 +13,59 @@ namespace SpriteNovel
 
 	class Director
 	{
-		public List<AdvancementDirective> CurrentDirectives 
-			= new List<AdvancementDirective>();
-		
-		public int CurrentAdvancement
-			{ get; private set; }
-
 		ScriptTree scriptTree;
-		public Script CurrentScript
+
+		Script CurrentScript
 			{ get { return scriptTree.script; } }
 
+		int CurrentAdvancementNum;
+		public Advancement CurrentAdvancement
+			{ get { return CurrentScript[CurrentAdvancementNum]; } }
+
+		public List<AdvancementDirective> CurrentDirectives 
+			= new List<AdvancementDirective>();
+
+		public AdvancementDirective GetDirective(string name)
+		{
+			foreach (var adv in CurrentDirectives)
+				if (adv.name == name)
+					return adv;
+			return new AdvancementDirective
+				{ name = "N/A", value = "N/A" };
+		}
+		
 		public List<string> Choices
 		{
 			get 
 			{
-				if (CurrentAdvancement >= CurrentScript.Count-1)
+				if (CurrentAdvancementNum >= CurrentScript.Count-1)
 					return (scriptTree.Paths.Select(n => n.choice).ToList());
 				else return new List<string>();
 			}
 		}
+
 		public bool AtChoicePoint()
-		{
-			return Choices.Count > 0;
-		}
+			{ return Choices.Count > 0; }
 
 		Queue<int> plannedChoices = new Queue<int>();
 		public void PlanChoice(int choice)
 			{ plannedChoices.Enqueue(choice); }
 
-
 		public Director(ScriptTree s)
 		{ 
 			scriptTree = s;
-			CurrentAdvancement = 0;
+			CurrentAdvancementNum = 0;
 			UpdateDirectives();
 		}
 
 		public DirectorStatus Advance()
 		{
-			return JumpToAdvancement(CurrentAdvancement + 1);
+			return JumpToAdvancement(CurrentAdvancementNum + 1);
 		}
 
 		public DirectorStatus JumpToAdvancement(int advancement)
 		{
-			CurrentAdvancement = advancement;
+			CurrentAdvancementNum = advancement;
 			DirectorStatus status = CheckAgainstBounds();
 			while ((status == DirectorStatus.PendingChoice)
 				&& (plannedChoices.Count > 0))
@@ -68,15 +77,14 @@ namespace SpriteNovel
 			return status;
 		}
 
-
 		void TakeChoice()
 		{
 			if  ((plannedChoices.Count > 0)
 				&& (plannedChoices.Peek() < scriptTree.Paths.Count))
 			{
 				int choice = plannedChoices.Dequeue();
-				if (CurrentAdvancement >= CurrentScript.Count)
-					CurrentAdvancement -= CurrentScript.Count;
+				if (CurrentAdvancementNum >= CurrentScript.Count)
+					CurrentAdvancementNum -= CurrentScript.Count;
 				scriptTree = scriptTree.Paths[choice].tree;
 			}
 		}
@@ -88,9 +96,9 @@ namespace SpriteNovel
 				return status;
 
 			CurrentDirectives = 
-				new List<AdvancementDirective>(CurrentScript[CurrentAdvancement].directives);
+				new List<AdvancementDirective>(CurrentAdvancement.directives);
 			CurrentDirectives.Add(new AdvancementDirective 
-				{ name = "dialogue", value = CurrentScript[CurrentAdvancement].dialogue });
+				{ name = "dialogue", value = CurrentAdvancement.dialogue });
 
 			CopyPersistingDirectives();
 
@@ -99,13 +107,13 @@ namespace SpriteNovel
 
 		DirectorStatus CheckAgainstBounds()
 		{
-			if (CurrentAdvancement >= CurrentScript.Count)
+			if (CurrentAdvancementNum >= CurrentScript.Count)
 			{
 				if (scriptTree.Paths.Count > 0)
 					return DirectorStatus.PendingChoice;
 				else 
 				{
-					CurrentAdvancement = CurrentScript.Count-1;
+					CurrentAdvancementNum = CurrentScript.Count-1;
 					return DirectorStatus.EndOfScripts;
 				}
 			}
@@ -134,7 +142,7 @@ namespace SpriteNovel
 		string LastValueOfDirective(string directiveName)
 		{
 			for (var node = scriptTree; node != null; node = node.Parent)
-				for (int i = CurrentAdvancement; i >= 0; --i)
+				for (int i = CurrentAdvancementNum; i >= 0; --i)
 					foreach (var dir in node.script[i].directives)
 						if (dir.name == directiveName)
 							return dir.value;
