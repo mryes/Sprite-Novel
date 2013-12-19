@@ -39,7 +39,7 @@ namespace SpriteNovel
 		{
 			// Every advancement needs dialogue
 			if (advString.IndexOf('"') < 0)
-				throw new ArgumentException();
+				throw new FormatException();
 
 			var directiveStrings = new List<string>();
 			if (advString.IndexOf('"') > 0)
@@ -79,6 +79,37 @@ namespace SpriteNovel
 			}
 
 			return script;
+		}
+	}
+
+	struct ScriptPath
+	{
+		public ScriptTree tree;
+		public string choice;
+
+		public ScriptPath(ScriptTree tree, string choice)
+		{
+			this.tree = tree;
+			this.choice = choice;
+		}
+	}
+
+	class ScriptTree
+	{
+		public Script script;
+		public List<ScriptPath> Paths { get; private set; }
+		public ScriptTree Parent { get; private set; }
+
+		public ScriptTree(Script stScript)
+		{
+			script = stScript;
+			Paths  = new List<ScriptPath>();
+		}
+
+		public void AddPath(ScriptPath path)
+		{
+			Paths.Add(path);
+			path.tree.Parent = this;
 		}
 	}
 }
