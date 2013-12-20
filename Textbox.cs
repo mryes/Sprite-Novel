@@ -27,13 +27,15 @@ namespace SpriteNovel
 			FontReference = font;
 			FontReferenceSize = fontSize;
 			WrapWidth = width;
+			Strings = new List<string>();
 			CreateTextStrings();
 		}
 
-		public void AppendText(string str)
+		public void AppendText(string str, bool space)
 		{
-			rawText += str;
-			CreateTextStrings();
+			if (space)
+				str = " " + str;
+			CreateTextStrings(str);
 		}
 
 		public char GetCharacterAtPosition(int position)
@@ -41,7 +43,7 @@ namespace SpriteNovel
 			if (position <= EndPosition)
 			{
 				int row = 0;
-	            int column = 0;
+				int column = 0;
 				foreach (string str in Strings) {
 					if ((column + str.Length) <= position) {
 						column += str.Length;
@@ -57,16 +59,24 @@ namespace SpriteNovel
 			return '\0';
 		}
 
-		string rawText;
+		readonly string rawText;
 
-		void CreateTextStrings()
+		void CreateTextStrings(string stringToAdd = "")
 		{
-			Strings = new List<string>();
-			List<string> words = rawText.Split(' ').ToList();
+			var words = (stringToAdd == "")
+				? rawText.Split(' ').ToList()
+				: stringToAdd.Split(' ').ToList();
+
+			string line;
+			if (Strings.Count > 0)
+			{
+				line = Strings.Last();
+				Strings.RemoveAt(Strings.Count-1);
+			}
+			else line = "";
 
 			while (words.Count > 0) {
 
-				string line = "";
 				int wordsAdded = 0;
 				foreach (string word in words) {
 					string testLine = line + word + " ";
@@ -85,6 +95,7 @@ namespace SpriteNovel
 				words.RemoveRange(0, wordsAdded);
 				line = line.TrimEnd(' ');
 				Strings.Add(line);
+				line = "";
 			}
 		}
 
@@ -171,11 +182,16 @@ namespace SpriteNovel
 				FullText.EndPosition - invisibleCharacters
 			);
 
-			VisibleText.AppendText(new string(newCharacter, 1));
+			VisibleText.AppendText(new string(newCharacter, 1), false);
 
 			if (newCharacter == ',')
 				timeUntilNextCharacter *= commaPause;
 		}
+	}
+
+	class Textbox
+	{
+
 	}
 }
 

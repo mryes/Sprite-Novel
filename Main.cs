@@ -26,26 +26,14 @@ namespace SpriteNovel
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBA, choice: "You."));
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBB, choice: "Me."));
 
-			/*do
-			{
-				Console.Write(String.Format("{0}", directorTest.GetDirective("dialogue").value));
-				if (directorTest.AtChoicePoint())
-					Console.WriteLine("\n");
-				foreach(string option in directorTest.Choices)
-					Console.WriteLine(option);
-				Console.WriteLine();
-				if (directorTest.AtChoicePoint())
-					directorTest.PlanChoice(Convert.ToInt32(Console.ReadLine()));
-				else Console.ReadLine();
-
-			} while (directorTest.Advance() != DirectorStatus.EndOfScripts);*/
-
 			var font = new Font("rix.ttf");
 
 			var text = new WrappedText (
-				"Helpers make helpers make further helpers",
-				font, 15, 200
+				"Helpers make helpers make further helpers.",
+				font, 15, 300
 			);
+
+			text.AppendText("Wondrous makes me feel how I always wanted to feel.", true);
 
 
 		}
