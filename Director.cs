@@ -19,16 +19,16 @@ namespace SpriteNovel
 		{
 			get 
 			{
-				if (CurrentAdvancementNum >= CurrentScript.Count-1)
-					return (scriptTree.Paths.Select(n => n.choice).ToList());
-				else return new List<string>();
+				if (currentAdvancementNum >= CurrentScript.Count-1)
+					return (scriptTree.Paths.Select(n => n.Choice).ToList());
+				return new List<string>();
 			}
 		}
 
 		public Director(ScriptTree s)
 		{ 
 			scriptTree = s;
-			CurrentAdvancementNum = 0;
+			currentAdvancementNum = 0;
 			CurrentDirectives = new List<AdvancementDirective>();
 			UpdateDirectives();
 		}
@@ -36,20 +36,20 @@ namespace SpriteNovel
 		public AdvancementDirective GetDirective(string name)
 		{
 			foreach (var adv in CurrentDirectives)
-				if (adv.name == name)
+				if (adv.Name == name)
 					return adv;
 			return new AdvancementDirective
-				{ name = "N/A", value = "N/A" };
+				{ Name = "N/A", Value = "N/A" };
 		}
 
 		public DirectorStatus AdvanceOnce()
 		{
-			return JumpToAdvancement(CurrentAdvancementNum + 1);
+			return JumpToAdvancement(currentAdvancementNum + 1);
 		}
 
 		public DirectorStatus JumpToAdvancement(int advancement)
 		{
-			CurrentAdvancementNum = advancement;
+			currentAdvancementNum = advancement;
 			DirectorStatus status = CheckAgainstBounds();
 			while ((status == DirectorStatus.PendingChoice)
 				&& (plannedChoices.Count > 0)) {
@@ -75,13 +75,13 @@ namespace SpriteNovel
 
 		Script CurrentScript
 		{ 
-			get { return scriptTree.script; } 
+			get { return scriptTree.Script; } 
 		}
 
-		int CurrentAdvancementNum;
+		int currentAdvancementNum;
 		Advancement CurrentAdvancement
 		{
-			get { return CurrentScript[CurrentAdvancementNum]; } 
+			get { return CurrentScript[currentAdvancementNum]; } 
 		}
 
 		Queue<int> plannedChoices = new Queue<int>();
@@ -93,10 +93,10 @@ namespace SpriteNovel
 				return status;
 
 			CurrentDirectives = 
-				new List<AdvancementDirective>(CurrentAdvancement.directives);
+				new List<AdvancementDirective>(CurrentAdvancement.Directives);
 			CurrentDirectives.Add(new AdvancementDirective { 
-				name = "dialogue", 
-				value = CurrentAdvancement.dialogue 
+				Name = "dialogue", 
+				Value = CurrentAdvancement.Dialogue 
 			});
 
 			CopyPersistingDirectives();
@@ -106,13 +106,12 @@ namespace SpriteNovel
 
 		DirectorStatus CheckAgainstBounds()
 		{
-			if (CurrentAdvancementNum >= CurrentScript.Count) {
+			if (currentAdvancementNum >= CurrentScript.Count) {
 				if (scriptTree.Paths.Count > 0)
 					return DirectorStatus.PendingChoice;
-				else {
-					CurrentAdvancementNum = CurrentScript.Count-1;
-					return DirectorStatus.EndOfScripts;
-				}
+
+				currentAdvancementNum = CurrentScript.Count-1;
+				return DirectorStatus.EndOfScripts;
 			}
 
 			return DirectorStatus.Success;
@@ -123,24 +122,24 @@ namespace SpriteNovel
 			if  ((plannedChoices.Count > 0)
 				&& (plannedChoices.Peek() < scriptTree.Paths.Count)) {
 				int choice = plannedChoices.Dequeue();
-				if (CurrentAdvancementNum >= CurrentScript.Count)
-					CurrentAdvancementNum -= CurrentScript.Count;
-				scriptTree = scriptTree.Paths[choice].tree;
+				if (currentAdvancementNum >= CurrentScript.Count)
+					currentAdvancementNum -= CurrentScript.Count;
+				scriptTree = scriptTree.Paths[choice].Tree;
 			}
 		}
 
-		string[] persistingDirectives = { "music" };
+		readonly string[] persistingDirectives = { "music" };
 		void CopyPersistingDirectives()
 		{
 			var directiveNames = new List<string>();
 			foreach (var curDir in CurrentDirectives)
-				directiveNames.Add(curDir.name);
+				directiveNames.Add(curDir.Name);
 			foreach (var perDir in persistingDirectives) {
 				if (!directiveNames.Contains(perDir)) {
 					string lastValue = LastValueOfDirective(perDir);
 					if (lastValue != "")
 						CurrentDirectives.Add(new AdvancementDirective 
-							{ name = perDir, value = lastValue });
+							{ Name = perDir, Value = lastValue });
 				}
 			}
 		}
@@ -148,10 +147,10 @@ namespace SpriteNovel
 		string LastValueOfDirective(string directiveName)
 		{
 			for (var node = scriptTree; node != null; node = node.Parent)
-				for (int i = CurrentAdvancementNum; i >= 0; --i)
-					foreach (var dir in node.script[i].directives)
-						if (dir.name == directiveName)
-							return dir.value;
+				for (int i = currentAdvancementNum; i >= 0; --i)
+					foreach (var dir in node.Script[i].Directives)
+						if (dir.Name == directiveName)
+							return dir.Value;
 			return "";
 		}
 	}

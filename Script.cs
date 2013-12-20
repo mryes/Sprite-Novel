@@ -6,32 +6,30 @@ namespace SpriteNovel
 {
 	struct AdvancementDirective
 	{
-		public string name;
-		public string value;
+		public string Name;
+		public string Value;
 
 		public static AdvancementDirective Parse(string dirString)
 		{
 			if (dirString.Contains("="))
 			{
 				return new AdvancementDirective {	
-					name  = dirString.Substring(0, dirString.IndexOf('=')), 
-					value = dirString.Substring(dirString.IndexOf('=')+1)
+					Name  = dirString.Substring(0, dirString.IndexOf('=')), 
+					Value = dirString.Substring(dirString.IndexOf('=')+1)
 				};
 			}
-			else
-			{
-				return new AdvancementDirective { 
-					name  = dirString,
-					value = "N/A" 
-				};
-			}
+
+			return new AdvancementDirective { 
+				Name  = dirString,
+				Value = "N/A" 
+			};
 		}
 	}
 
 	struct Advancement
 	{
-		public List<AdvancementDirective> directives;
-		public string dialogue;
+		public List<AdvancementDirective> Directives;
+		public string Dialogue;
 
 		public static Advancement Parse(string advString)
 		{
@@ -55,8 +53,8 @@ namespace SpriteNovel
 					dirs.Add(AdvancementDirective.Parse(dir));
 
 			return new Advancement { 
-				directives = dirs, 
-				dialogue   = advString.Substring(advString.IndexOf('"')+1).TrimEnd('"')
+				Directives = dirs, 
+				Dialogue   = advString.Substring(advString.IndexOf('"')+1).TrimEnd('"')
 			};
 		}
 	}
@@ -80,32 +78,32 @@ namespace SpriteNovel
 
 	struct ScriptPath
 	{
-		public ScriptTree tree;
-		public string choice;
+		public ScriptTree Tree;
+		public string Choice;
 
 		public ScriptPath(ScriptTree tree, string choice)
 		{
-			this.tree = tree;
-			this.choice = choice;
+			Tree = tree;
+			Choice = choice;
 		}
 	}
 
 	class ScriptTree
 	{
-		public Script script;
+		public Script Script;
 		public List<ScriptPath> Paths { get; private set; }
 		public ScriptTree Parent { get; private set; }
 
 		public ScriptTree(Script stScript)
 		{
-			script = stScript;
+			Script = stScript;
 			Paths  = new List<ScriptPath>();
 		}
 
 		public void AddPath(ScriptPath path)
 		{
 			Paths.Add(path);
-			path.tree.Parent = this;
+			path.Tree.Parent = this;
 		}
 	}
 }

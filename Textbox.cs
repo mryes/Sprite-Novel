@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFML;
 using SFML.Graphics;
 
 namespace SpriteNovel
@@ -18,7 +16,7 @@ namespace SpriteNovel
 			{
 				int runningTotal = 0;
 				foreach (string str in Strings)
-					runningTotal += str.Count();
+					runningTotal += str.Length;
 				return runningTotal-1;
 			}
 		}
@@ -45,8 +43,8 @@ namespace SpriteNovel
 				int row = 0;
 	            int column = 0;
 				foreach (string str in Strings) {
-					if ((column + str.Count()) <= position) {
-						column += str.Count();
+					if ((column + str.Length) <= position) {
+						column += str.Length;
 						++row;
 					}
 					else {
@@ -56,7 +54,7 @@ namespace SpriteNovel
 				}
 				return Strings[row][column];
 			}
-			else return '\0';
+			return '\0';
 		}
 
 		string rawText;
@@ -65,15 +63,27 @@ namespace SpriteNovel
 		{
 			Strings = new List<string>();
 			List<string> words = rawText.Split(' ').ToList();
-			string line = "";
+
 			while (words.Count > 0) {
+
+				string line = "";
+				int wordsAdded = 0;
 				foreach (string word in words) {
-					string testLine = line + word;
-					if (CalculateWidthOfString(testLine) > WrapWidth)
-						break;
+					string testLine = line + word + " ";
+					int calculatedWidth = CalculateWidthOfString(testLine);
+					if (calculatedWidth > WrapWidth)
+					{
+						// Maybe it will fit without the extra space added
+						if ((calculatedWidth - CalculateWidthOfString(" ")) > WrapWidth)
+							break;
+						testLine = testLine.TrimEnd(' ');
+					}
 					line = testLine;
-					words.RemoveAt(0);
+					++wordsAdded;
 				}
+
+				words.RemoveRange(0, wordsAdded);
+				line = line.TrimEnd(' ');
 				Strings.Add(line);
 			}
 		}
@@ -81,9 +91,9 @@ namespace SpriteNovel
 		int CalculateWidthOfString(string str)
 		{
 			int width = 0;
-			for (int i=0; i<str.Count(); ++i) {
+			for (int i=0; i<str.Length; ++i) {
 				width += FontReference.GetGlyph(str[i], (uint)FontReferenceSize, false).Bounds.Width;
-				if (i+1 < str.Count())
+				if (i+1 < str.Length)
 					width += FontReference.GetKerning(str[i], str[i+1], (uint)FontReferenceSize);
 			}
 			return width;
@@ -160,6 +170,7 @@ namespace SpriteNovel
 			char newCharacter = FullText.GetCharacterAtPosition(
 				FullText.EndPosition - invisibleCharacters
 			);
+
 			VisibleText.AppendText(new string(newCharacter, 1));
 
 			if (newCharacter == ',')

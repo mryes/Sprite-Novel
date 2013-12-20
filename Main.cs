@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SFML.Graphics;
 
 namespace SpriteNovel
 {
@@ -14,11 +15,11 @@ namespace SpriteNovel
 			Script scriptBA   = Script.Parse("n \"I'm tasty.\"");
 			Script scriptBB   = Script.Parse("n \"I do like to eat you.\"");
 
-			ScriptTree scriptTreeRoot = new ScriptTree(scriptRoot);
-			ScriptTree scriptTreeA 	  = new ScriptTree(scriptA);
-			ScriptTree scriptTreeB 	  = new ScriptTree(scriptB);
-			ScriptTree scriptTreeBA   = new ScriptTree(scriptBA);
-			ScriptTree scriptTreeBB   = new ScriptTree(scriptBB);
+			var scriptTreeRoot  = new ScriptTree(scriptRoot);
+			var scriptTreeA 	= new ScriptTree(scriptA);
+			var scriptTreeB 	= new ScriptTree(scriptB);
+			var scriptTreeBA    = new ScriptTree(scriptBA);
+			var scriptTreeBB    = new ScriptTree(scriptBB);
 
 			scriptTreeRoot.AddPath(new ScriptPath(tree: scriptTreeA, choice: "Run."));
 			scriptTreeRoot.AddPath(new ScriptPath(tree: scriptTreeB, choice: "Walk."));
@@ -38,6 +39,13 @@ namespace SpriteNovel
 				else Console.ReadLine();
 
 			} while (directorTest.Advance() != DirectorStatus.EndOfScripts);*/
+
+			var font = new Font("rix.ttf");
+
+			var text = new WrappedText (
+				"Helpers make helpers make further helpers",
+				font, 15, 200
+			);
 
 
 		}
