@@ -13,16 +13,14 @@ namespace SpriteNovel
 		{
 			if (dirString.Contains("="))
 			{
-				return new AdvancementDirective 
-				{	
+				return new AdvancementDirective {	
 					name  = dirString.Substring(0, dirString.IndexOf('=')), 
 					value = dirString.Substring(dirString.IndexOf('=')+1)
 				};
 			}
 			else
 			{
-				return new AdvancementDirective 
-				{ 
+				return new AdvancementDirective { 
 					name  = dirString,
 					value = "N/A" 
 				};
@@ -56,8 +54,7 @@ namespace SpriteNovel
 				if (dir != "")
 					dirs.Add(AdvancementDirective.Parse(dir));
 
-			return new Advancement 
-			{ 
+			return new Advancement { 
 				directives = dirs, 
 				dialogue   = advString.Substring(advString.IndexOf('"')+1).TrimEnd('"')
 			};
@@ -72,8 +69,7 @@ namespace SpriteNovel
 				MiscUtilities.SplitEveryNthOccurrence(scriptString, '"', 2);
 
 			var script = new Script();
-			foreach (string str in advStrings)
-			{
+			foreach (string str in advStrings) {
 				Advancement adv = Advancement.Parse(str);
 				script.Add(adv);
 			}

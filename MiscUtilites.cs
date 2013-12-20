@@ -12,11 +12,9 @@ class MiscUtilities
 
 		for (int i=0; i<s.Count(); i++)
 		{
-			if (s[i] == ch)
-			{
+			if (s[i] == ch) {
 				++occurrences;
-				if (occurrences >= n)
-				{
+				if (occurrences >= n) {
 					strings.Add(s.Substring(startingSpot, i-startingSpot+1));
 					startingSpot = i+1;
 					occurrences  = 0;
@@ -29,4 +27,5 @@ class MiscUtilities
 
 		return strings.ToList();
 	}
+
 }

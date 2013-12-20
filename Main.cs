@@ -25,9 +25,7 @@ namespace SpriteNovel
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBA, choice: "You."));
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBB, choice: "Me."));
 
-			Director directorTest = new Director(scriptTreeRoot);
-
-			do
+			/*do
 			{
 				Console.Write(String.Format("{0}", directorTest.GetDirective("dialogue").value));
 				if (directorTest.AtChoicePoint())
@@ -39,7 +37,9 @@ namespace SpriteNovel
 					directorTest.PlanChoice(Convert.ToInt32(Console.ReadLine()));
 				else Console.ReadLine();
 
-			} while (directorTest.Advance() != DirectorStatus.EndOfScripts);
+			} while (directorTest.Advance() != DirectorStatus.EndOfScripts);*/
+
+
 		}
 	}
 }
