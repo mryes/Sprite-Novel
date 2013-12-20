@@ -28,13 +28,13 @@ namespace SpriteNovel
 
 			var font = new Font("rix.ttf");
 
-			var text = new WrappedText (
+			var text = new WrappedText(
 				"Helpers make helpers make further helpers.",
-				font, 15, 300
-			);
+				font, 15, 300);
 
 			text.AppendText("Wondrous makes me feel how I always wanted to feel.", true);
 
+			Stage.Start();
 
 		}
 	}

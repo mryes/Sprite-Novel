@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using SFML.Window;
 using SFML.Graphics;
 
 namespace SpriteNovel
@@ -7,6 +8,16 @@ namespace SpriteNovel
 	struct WrappedText
 	{
 		public List<string> Strings { get; private set; }
+		public string FlatString 
+		{ 
+			get
+			{
+				string flatString = "";
+				foreach (string str in Strings)
+					flatString += str + "\n";
+				return flatString.TrimEnd('\n');
+			}
+		}
 		public Font FontReference { get; private set; }
 		public int  FontReferenceSize { get; private set; }
 		public int  WrapWidth { get; private set; }
@@ -57,6 +68,11 @@ namespace SpriteNovel
 				return Strings[row][column];
 			}
 			return '\0';
+		}
+
+		public void RemoveLine(int line)
+		{
+			Strings.RemoveAt(line);
 		}
 
 		readonly string rawText;
@@ -126,10 +142,20 @@ namespace SpriteNovel
 		}
 
 		public WrappedText VisibleText { get; private set; }
-
-		public int ScrollAmount { get; private set; }
 		public double TextAppearanceSpeed { get; set; }
 		public bool AnimationActive { get; private set; }
+
+		int scrollAmount;
+		public int ScrollAmount { 
+			get { return scrollAmount; }
+			private set
+			{
+				scrollAmount = value;
+				for (int i=0; i<VisibleText.Strings.Count; i++)
+					if (i < scrollAmount)
+						VisibleText.RemoveLine(i);
+			}
+		}
 
 		AnimatedWrappedText(string rawStr, Font font, int fontsize, int width)
 		{
@@ -189,9 +215,33 @@ namespace SpriteNovel
 		}
 	}
 
-	class Textbox
+	class Textbox : Drawable
 	{
+		public static readonly Texture BoxTexture = new Texture("resources/textbox.png");
+		public static readonly Font TextFont = new Font("resources/gohufont-11.pcf");
+		public static readonly Vector2i Position = new Vector2i(0, 270);
+		public static readonly int BorderWidth = 10;
 
+		public WrappedText Content { get; private set; }
+		
+		public Textbox(Texture boxTexture)
+		{
+			boxSprite = new Sprite(BoxTexture);
+			boxSprite.Position = new Vector2f(Position.X, Position.Y);
+
+			text = new Text("", TextFont);
+			text.Position = boxSprite.Position + new Vector2f(BorderWidth, BorderWidth);
+		}
+
+		public void Draw(RenderTarget target, RenderStates states)
+		{
+			text.DisplayedString = Content.FlatString;
+			target.Draw(boxSprite);
+			target.Draw(text);
+		}
+
+		readonly Sprite boxSprite;
+		readonly Text text;
 	}
 }
 
