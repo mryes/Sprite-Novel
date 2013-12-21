@@ -160,7 +160,7 @@ namespace SpriteNovel
     class AnimatedWrappedText
     {
         public static readonly int InstantSpeed = -1;
-        public static readonly int DefaultSpeed = 30;
+        public static readonly int DefaultSpeed = 50;
         WrappedText fullText;
 
         public WrappedText FullText { 
@@ -201,17 +201,19 @@ namespace SpriteNovel
                 if (TextAppearanceSpeed > InstantSpeed) {
                     timeUntilNextCharacter -= elapsedTime;
                     if (timeUntilNextCharacter <= 0) {
-                        if (invisibleCharacters > 0)
+                        if (invisibleCharacters > 0) {
                             AddCharacter();
-                        else
-                            AnimationActive = false;
-                        timeUntilNextCharacter = (1 / TextAppearanceSpeed)
-                        + timeUntilNextCharacter;
+                            // Add multiple characters, if appearance speed calls for it
+                            while ((timeUntilNextCharacter + (1 / TextAppearanceSpeed)) < 0) {
+                                timeUntilNextCharacter += (1 / TextAppearanceSpeed);
+                                AddCharacter();
+                            }
+                        } else AnimationActive = false;
+                        timeUntilNextCharacter = (1 / TextAppearanceSpeed) + timeUntilNextCharacter;
                         if (mostRecentCharacter == ',')
                             timeUntilNextCharacter *= commaPause;
                     }
-                } else
-                    SkipAnimation();
+                } else SkipAnimation();
             }
         }
 

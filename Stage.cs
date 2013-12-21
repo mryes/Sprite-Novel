@@ -17,7 +17,10 @@ namespace SpriteNovel
 
         public static readonly Dictionary<string, CharacterSetting> CharacterSettings 
 			= new Dictionary<string, CharacterSetting>() {
-            { "bustin", new CharacterSetting { TextColor = Color.Blue } }
+            { "bustin", new CharacterSetting { TextColor = new Color(60, 70, 140) } },
+            { "lamber", new CharacterSetting { TextColor = Color.Blue } },
+            { "mom",    new CharacterSetting { TextColor = Color.Blue } },
+            { "dad",    new CharacterSetting { TextColor = Color.Blue } }
         };
 
         public static void Start()
@@ -107,7 +110,7 @@ namespace SpriteNovel
 
         static ScriptTree LoadScriptTree()
         {
-            Script scriptRoot = Script.Parse("n clear character=bustin music=lovely  `Hello.` `What do you want to do today?` n `Shit on people?` `The biggest difference in the 2nd edition was redefining the target audience.` `Remember I said that the first edition was intended for advanced and beginning users?` `Well, now there were four competing books on the market.`");
+            Script scriptRoot = Script.Parse("n clear character=bustin music=lovely  `Hello.` `What do you want to do today?` n `Shit on people?` clear `The biggest difference in the 2nd edition was redefining the target audience.` `Remember I said that the first edition was intended for advanced and beginning users?` `Well, now there were four competing books on the market.`");
             Script scriptA = Script.Parse("n `You want to run? Okay, let's run.`");
             Script scriptB = Script.Parse("n `Yeah? Just walking? That's fine. What do you want to eat?` `Shit?`");
             Script scriptBA = Script.Parse("n `I'm tasty.`");
