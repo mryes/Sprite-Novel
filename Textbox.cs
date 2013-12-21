@@ -15,8 +15,8 @@ namespace SpriteNovel
 			{
 				string flatString = "";
 				foreach (string str in Strings)
-					flatString += str;
-				return flatString;
+					flatString += str + "\n";
+				return flatString.TrimEnd('\n');
 			}
 		}
 		public Font FontReference { get; private set; }
@@ -180,31 +180,11 @@ namespace SpriteNovel
 		public double TextAppearanceSpeed { get; set; }
 		public bool AnimationActive { get; private set; }
 
-		int scrollAmount;
-		public int ScrollAmount { 
-			get { return scrollAmount; }
-			private set
-			{
-				scrollAmount = value;
-				/*for (int i=0; i<VisibleText.Strings.Count; i++)
-					if (i < scrollAmount)
-						VisibleText.RemoveLine(i);*/
-			}
-		}
-
 		public AnimatedWrappedText(string rawStr, Font font, uint fontsize, uint width)
 		{
 			AnimationActive = false;
 			FullText    = new WrappedText(rawStr, font, fontsize, width);
 			VisibleText = new WrappedText("", font, fontsize, width);
-
-			for (int i=0; i<VisibleText.Strings.Count; i++)
-			{
-				string invisibleString = "";
-				foreach (char c in VisibleText.Strings[i])
-					invisibleString += '\v';
-				VisibleText.Strings[i] = invisibleString;
-			}
 
 			invisibleCharacters = FullText.EndPosition + 1;
 		}
@@ -213,6 +193,8 @@ namespace SpriteNovel
 		{
 			AnimationActive = true;
 			timeUntilNextCharacter = 0;
+			invisibleCharacters = (FullText.EndPosition + 1) 
+			                    - (VisibleText.EndPosition + 1);
 		}
 
 		public void UpdateAnimation(double elapsedTime)
@@ -220,7 +202,7 @@ namespace SpriteNovel
 			if (AnimationActive) {
 				timeUntilNextCharacter -= elapsedTime;
 				if (timeUntilNextCharacter <= 0) {
-					if (VisibleText.EndPosition < FullText.EndPosition)
+					if (invisibleCharacters > 0)
 						AddCharacter();
 					else AnimationActive = false;
 					timeUntilNextCharacter = 1 / TextAppearanceSpeed;
@@ -232,11 +214,17 @@ namespace SpriteNovel
 
 		public void ClearAndRestart(string rawStr)
 		{
-			Font font = FullText.FontReference;
-			uint size = FullText.FontReferenceSize;
-			FullText = new WrappedText(rawStr, font, size, FullText.WrapWidth);
-			VisibleText = new WrappedText("", font, size, FullText.WrapWidth);
-			invisibleCharacters = FullText.EndPosition;
+			FullText = new WrappedText(
+				rawStr, 
+				FullText.FontReference, 
+				FullText.FontReferenceSize, 
+				FullText.WrapWidth);
+			VisibleText = new WrappedText(
+				"", 
+				FullText.FontReference, 
+				FullText.FontReferenceSize, 
+				FullText.WrapWidth);
+			invisibleCharacters = FullText.EndPosition + 1;
 		}
 
 		readonly int textboxRows = 4;
@@ -254,40 +242,35 @@ namespace SpriteNovel
 				return;
 			}
 
-			if (VisibleText.Strings.Count > ScrollAmount + textboxRows)
-				++ScrollAmount;
-
 			mostRecentCharacter = FullText.GetCharacterAtPosition(
-				FullText.EndPosition - invisibleCharacters
-			);
+				FullText.EndPosition - invisibleCharacters);
 
 			var newWrappedText = new WrappedText(
 				"",
 				FullText.FontReference,
 				FullText.FontReferenceSize,
 				FullText.WrapWidth); 
-
 			newWrappedText.Strings = FullText.StringHead(FullText.EndPosition+1 - invisibleCharacters);
 			VisibleText = newWrappedText;
 
-			//for (int i=0; i<VisibleText.Strings.Count; i++)
-			//	if (i < scrollAmount)
-			//		VisibleText.RemoveLine(i);
 			while (VisibleText.Strings.Count > textboxRows) {
 				VisibleText.RemoveLine(0);
+				FullText.RemoveLine(0);
 			}
+				
 		}
 	}
 
 	class Textbox : Drawable
 	{
 		public static readonly Texture BoxTexture = new Texture("resources/textbox.png");
-		public static readonly Font TextFont = new Font("resources/rix.ttf");
-		public static readonly uint FontSize = 8;
-		public static readonly uint LineSpacing = 5;
+		public static readonly Font TextFont = new Font("resources/gohufont-11.pcf");
+		public static readonly uint FontSize = 11;
+		public static readonly uint LineSpacing = 2;
 
 		public static readonly Vector2f Position = new Vector2f(0, 135);
 		public static readonly uint BorderWidth = 8;
+		public static readonly uint BorderHeight = 5;
 
 		public AnimatedWrappedText Content { get; private set; }
 		
@@ -308,7 +291,7 @@ namespace SpriteNovel
 				var text = new Text(str, TextFont, FontSize);
 				text.Position = boxSprite.Position + new Vector2f(
 					BorderWidth, 
-					BorderWidth + (FontSize+LineSpacing) * i);
+					BorderHeight + (FontSize+LineSpacing) * i);
 				text.Color = Color.Black;
 				target.Draw(text, states);
 				i++;

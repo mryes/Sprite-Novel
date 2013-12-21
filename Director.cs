@@ -13,6 +13,8 @@ namespace SpriteNovel
 
 	class Director
 	{
+		public static readonly string DirectiveNotFoundError = "Directive Not Found";
+
 		public List<AdvancementDirective> CurrentDirectives;
 
 		public List<string> Choices
@@ -39,7 +41,12 @@ namespace SpriteNovel
 				if (adv.Name == name)
 					return adv;
 			return new AdvancementDirective
-				{ Name = "N/A", Value = "N/A" };
+			{ Name = DirectiveNotFoundError, Value = "N/A" };
+		}
+
+		public bool GaveDirective(string name)
+		{
+			return GetDirective(name).Name != DirectiveNotFoundError;
 		}
 
 		public DirectorStatus AdvanceOnce()
@@ -96,8 +103,7 @@ namespace SpriteNovel
 				new List<AdvancementDirective>(CurrentAdvancement.Directives);
 			CurrentDirectives.Add(new AdvancementDirective { 
 				Name = "dialogue", 
-				Value = CurrentAdvancement.Dialogue 
-			});
+				Value = CurrentAdvancement.Dialogue });
 
 			CopyPersistingDirectives();
 
