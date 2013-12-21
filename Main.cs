@@ -26,13 +26,13 @@ namespace SpriteNovel
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBA, choice: "You."));
 			scriptTreeB.AddPath(new ScriptPath(tree: scriptTreeBB, choice: "Me."));
 
-			var font = new Font("rix.ttf");
+			/*var font = new Font("rix.ttf");
 
 			var text = new WrappedText(
 				"Helpers make helpers make further helpers.",
 				font, 15, 300);
 
-			text.AppendText("Wondrous makes me feel how I always wanted to feel.", true);
+			text.AppendText("Wondrous makes me feel how I always wanted to feel.", true);*/
 
 			Stage.Start();
 
