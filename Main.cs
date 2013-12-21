@@ -5,11 +5,11 @@ using SFML.Graphics;
 
 namespace SpriteNovel
 {
-	class MainClass
-	{
-		static void Main()
-		{
-			Stage.Start();
-		}
-	}
+    class MainClass
+    {
+        static void Main()
+        {
+            Stage.Start();
+        }
+    }
 }
