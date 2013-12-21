@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using SFML.Window;
 using SFML.Graphics;
 
@@ -19,6 +20,7 @@ namespace SpriteNovel
 				new VideoMode(WindowWidth, WindowHeight),
 				WindowTitle,
 				Styles.Close);
+			window.SetMouseCursorVisible(false);
 
 			RenderTexture canvas = new RenderTexture(
 				ScreenWidth, ScreenHeight);
@@ -31,37 +33,53 @@ namespace SpriteNovel
 				Textbox.TextFont,
 				Textbox.FontSize,
 				ScreenWidth - Textbox.BorderWidth * 2);
-			animatedText.TextAppearanceSpeed = 80;
+			animatedText.TextAppearanceSpeed = 30;
 			animatedText.StartAnimation();
 
 			var textbox = new Textbox(animatedText);
 
+			var cursorTexture = new Texture("resources/cursor.png");
+			var cursor = new Sprite(cursorTexture);
+			cursor.Origin = new Vector2f((int)cursor.GetLocalBounds().Width / 2, 0);
+
 			window.Closed += OnClose;
-			window.MouseButtonPressed += (sender, e) => {
+			window.MouseButtonPressed += (sender, e) => 
+			{
 				if (!animatedText.AnimationActive) {
 					if (director.AdvanceOnce() == DirectorStatus.Success) {
+
 						if (director.GaveDirective("clear"))
 							animatedText.ClearAndRestart(director.GetDirective("dialogue").Value);
 						else animatedText.FullText.AppendText(
-							director.GetDirective("dialogue").Value, true);
+							director.GetDirective("dialogue").Value, 
+							true);
 						animatedText.StartAnimation();
+
 					}
 				}
+				else animatedText.SkipAnimation();
 			};
-		
-			DateTime now = DateTime.Now;
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
 
 			while (window.IsOpen())
 			{
-				double elapsedTime = (DateTime.Now - now).TotalSeconds;
-				now = DateTime.Now;
+				stopwatch.Stop();
+				double elapsedTime = stopwatch.Elapsed.TotalSeconds;
+				stopwatch = Stopwatch.StartNew();
 
 				window.DispatchEvents();
 
 				animatedText.UpdateAnimation(elapsedTime);
 
+				cursor.Position = window.MapPixelToCoords(Mouse.GetPosition(window));
+				cursor.Position = window.MapPixelToCoords(
+					window.MapCoordsToPixel(cursor.Position) / (int)ScreenScale);
+
 				canvas.Clear(Color.Black);
 				canvas.Draw(textbox);
+				canvas.Draw(cursor);
 				DrawScaled(window, canvas);
 			}
 		}
