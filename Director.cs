@@ -131,7 +131,7 @@ namespace SpriteNovel
             }
         }
 
-        readonly string[] persistingDirectives = { "music" };
+        readonly string[] persistingDirectives = { "music", "character" };
 
         void CopyPersistingDirectives()
         {

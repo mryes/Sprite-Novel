@@ -28,5 +28,10 @@ namespace SpriteNovel
 
             return strings.ToList();
         }
+
+        public static bool IsInRange(double num, double lower, double higher)
+        {
+            return ((num > lower) && (num < higher));
+        }
     }
 }

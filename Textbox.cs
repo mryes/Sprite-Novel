@@ -178,6 +178,8 @@ namespace SpriteNovel
 
         public bool AnimationActive { get; private set; }
 
+        public char MostRecentCharacter { get; private set; }
+
         public AnimatedWrappedText(string rawStr, Font font, uint fontsize, uint width)
         {
             AnimationActive = false;
@@ -204,13 +206,15 @@ namespace SpriteNovel
                         if (invisibleCharacters > 0) {
                             AddCharacter();
                             // Add multiple characters, if appearance speed calls for it
-                            while ((timeUntilNextCharacter + (1 / TextAppearanceSpeed)) < 0) {
+                            while (((timeUntilNextCharacter + (1 / TextAppearanceSpeed)) < 0) &&
+                                (MostRecentCharacter != ',')) {
                                 timeUntilNextCharacter += (1 / TextAppearanceSpeed);
                                 AddCharacter();
                             }
                         } else AnimationActive = false;
-                        timeUntilNextCharacter = (1 / TextAppearanceSpeed) + timeUntilNextCharacter;
-                        if (mostRecentCharacter == ',')
+                        timeUntilNextCharacter = (1 / TextAppearanceSpeed) 
+                                                 + ((MostRecentCharacter != ',') ? timeUntilNextCharacter : 0);
+                        if (MostRecentCharacter == ',')
                             timeUntilNextCharacter *= commaPause;
                     }
                 } else SkipAnimation();
@@ -243,7 +247,6 @@ namespace SpriteNovel
         readonly int textboxRows = 4;
         int invisibleCharacters;
         double timeUntilNextCharacter;
-        char mostRecentCharacter;
         readonly double commaPause = 15;
 
         void AddCharacter()
@@ -254,7 +257,7 @@ namespace SpriteNovel
                 return;
             }
 
-            mostRecentCharacter = FullText.GetCharacterAtPosition(
+            MostRecentCharacter = FullText.GetCharacterAtPosition(
                 FullText.EndPosition - invisibleCharacters);
 
             var newWrappedText = new WrappedText(
@@ -268,6 +271,11 @@ namespace SpriteNovel
             while (VisibleText.Strings.Count > textboxRows) {
                 VisibleText.RemoveLine(0);
                 FullText.RemoveLine(0);
+            }
+
+            if (MostRecentCharacter == ',')
+            {
+
             }
 				
         }
