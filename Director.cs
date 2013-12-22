@@ -53,6 +53,7 @@ namespace SpriteNovel
 
         public DirectorAdvancementStatus JumpToAdvancement(int advancement)
         {
+            int oldAdvancementNum = currentAdvancementNum;
             currentAdvancementNum = advancement;
             DirectorAdvancementStatus status = CheckAgainstBounds();
             while ((status == DirectorAdvancementStatus.PendingChoice)
@@ -62,6 +63,8 @@ namespace SpriteNovel
             }
             if (status == DirectorAdvancementStatus.Success)
                 UpdateDirectives();
+            else
+                currentAdvancementNum = oldAdvancementNum;
             return status;
         }
 
@@ -78,7 +81,7 @@ namespace SpriteNovel
         ScriptTree scriptTree;
 
         Script CurrentScript { 
-            get { return scriptTree.Script; } 
+            get { return scriptTree.Script; }
         }
 
         int currentAdvancementNum;
@@ -151,7 +154,7 @@ namespace SpriteNovel
         string LastValueOfDirective(string directiveName)
         {
             for (var node = scriptTree; node != null; node = node.Parent)
-                for (int i = currentAdvancementNum; i >= 0; --i)
+                for (int i = node.Script.Count-1; i >= 0; --i)
                     foreach (var dir in node.Script[i].Directives)
                         if (dir.Name == directiveName)
                             return dir.Value;

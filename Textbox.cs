@@ -194,7 +194,7 @@ namespace SpriteNovel
             AnimationActive = true;
             timeUntilNextCharacter = 0;
             invisibleCharacters = (FullText.EndPosition + 1)
-            - (VisibleText.EndPosition + 1);
+                                - (VisibleText.EndPosition + 1);
         }
 
         public void UpdateAnimation(double elapsedTime)
@@ -247,6 +247,8 @@ namespace SpriteNovel
         readonly int textboxRows = 4;
         int invisibleCharacters;
         double timeUntilNextCharacter;
+
+        readonly char[] pauseCharacters = { '.', '!', '?', ',' };
         readonly double commaPause = 15;
 
         void AddCharacter()
@@ -271,19 +273,12 @@ namespace SpriteNovel
             while (VisibleText.Strings.Count > textboxRows) {
                 VisibleText.RemoveLine(0);
                 FullText.RemoveLine(0);
-            }
-
-            if (MostRecentCharacter == ',')
-            {
-
-            }
-				
+            }	
         }
     }
 
     class Textbox : Drawable
     {
-        public static readonly Texture BoxTexture  = new Texture("resources/textbox.png");
         public static readonly Vector2f Position   = new Vector2f(0, 135);
         public static readonly Font TextFont       = new Font("resources/gohufont-11.pcf");
         public static readonly uint FontSize       = 11;
@@ -297,7 +292,7 @@ namespace SpriteNovel
 
         public Textbox(AnimatedWrappedText textSource)
         {
-            boxSprite = new Sprite(BoxTexture);
+            boxSprite = new Sprite(boxTexture);
             boxSprite.Position = Position;
             Content = textSource;
         }
@@ -318,6 +313,7 @@ namespace SpriteNovel
             }
         }
 
+        static readonly Texture boxTexture  = new Texture("resources/textbox.png");
         readonly Sprite boxSprite;
     }
 }

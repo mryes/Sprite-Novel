@@ -6,15 +6,15 @@ namespace SpriteNovel
 {
     public class AudioResources
     {
-
         public readonly Dictionary<string, Sound> SoundDict
             = new Dictionary<string, Sound> {
             {"text", new Sound(new SoundBuffer("resources/audio/test.wav"))},
-            {"advance", new Sound(new SoundBuffer("resources/audio/advance.wav"))}
+            {"advance", new Sound(new SoundBuffer("resources/audio/advance.wav"))},
+            {"choose", new Sound(new SoundBuffer("resources/audio/choose.wav"))}
         };
 
         public readonly Dictionary<string, Music> MusicDict 
-            = new Dictionary<string, Music>() {
+            = new Dictionary<string, Music> {
             {"wrunga", new Music("resources/audio/wrunga.ogg")}
 
         };
@@ -28,8 +28,6 @@ namespace SpriteNovel
             foreach (KeyValuePair<string, Music> m in MusicDict)
                 m.Value.Loop = true;
         }
-
-
     }
 }
 
