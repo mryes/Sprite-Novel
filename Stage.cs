@@ -52,7 +52,7 @@ namespace SpriteNovel
 
             Action AdvancementProgression = () => {
 
-                if (director.GaveDirective("clear"))
+                if (director.GaveDirective("c"))
                     animatedText.ClearAndRestart(director.GetDirective("dialogue").Value);
                 else animatedText.FullText.AppendText(
                     director.GetDirective("dialogue").Value, 
@@ -60,7 +60,7 @@ namespace SpriteNovel
                 animatedText.StartAnimation();
 
                 if ((director.GaveDirective("character")) &&
-                (director.GaveDirective("clear")))
+                (director.GaveDirective("c")))
                     textbox.TextColor = 
 						CharacterSettings[director.GetDirective("character").Value].TextColor;
 

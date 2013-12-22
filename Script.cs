@@ -30,6 +30,7 @@ namespace SpriteNovel
         public List<AdvancementDirective> Directives;
         public string Dialogue;
         public static readonly char DialogueDelimiter = '`';
+        public static readonly char[] Whitespace = { ' ', '\n', '\r' };
 
         public static Advancement Parse(string advString)
         {
@@ -40,12 +41,12 @@ namespace SpriteNovel
             var directiveStrings = new List<string>();
             if (advString.IndexOf(DialogueDelimiter) > 0)
                 directiveStrings = 
-					advString.TrimStart('\n').Substring(0, advString.IndexOf(DialogueDelimiter) - 1).Trim(' ')
-							 .Split(' ').ToList();
+                    advString.TrimStart(Whitespace).Substring(0, advString.IndexOf(DialogueDelimiter) - 1)
+                             .Trim(Whitespace).Split(' ').ToList();
 
-            // A newline character is the same as a "clear" directive
-            if (advString[0] == '\n')
-                directiveStrings.Insert(0, "clear");
+//            // A newline character is the same as a "clear" directive
+//            if (advString[0] == Environment.NewLine)
+//                directiveStrings.Insert(0, "clear");
 
             var dirs = new List<AdvancementDirective>();
             foreach (string dir in directiveStrings)

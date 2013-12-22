@@ -154,7 +154,7 @@ namespace SpriteNovel
         string LastValueOfDirective(string directiveName)
         {
             for (var node = scriptTree; node != null; node = node.Parent)
-                for (int i = node.Script.Count-1; i >= 0; --i)
+                for (int i = (node == scriptTree) ? currentAdvancementNum : node.Script.Count-1; i >= 0; --i)
                     foreach (var dir in node.Script[i].Directives)
                         if (dir.Name == directiveName)
                             return dir.Value;
