@@ -161,6 +161,7 @@ namespace SpriteNovel
     {
         public static readonly int InstantSpeed = -1;
         public static readonly int DefaultSpeed = 50;
+        public static readonly int SlowSpeed    = 20;
         WrappedText fullText;
 
         public WrappedText FullText { 

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using SFML.Window;
 using SFML.Graphics;
+using SharpCompress.Common;
+using SharpCompress.Reader;
 
 namespace SpriteNovel
 {
@@ -20,30 +23,15 @@ namespace SpriteNovel
             { "bustin", new CharacterSetting { TextColor = new Color(215, 40, 40) } },
             { "lamber", new CharacterSetting { TextColor = new Color(60, 70, 140) } },
             { "mom",    new CharacterSetting { TextColor = Color.Blue } },
-            { "dad",    new CharacterSetting { TextColor = Color.Blue } }
-        };
+            { "dad",    new CharacterSetting { TextColor = Color.Blue } } };
 
         public static void Start()
         {
-
-            // Resource loading (should probably be done before
-            // the window is created)
-
             var audioRes = new AudioResources();
             var cursorTexture = new Texture("resources/cursor.png");
 
-
-            var window = new RenderWindow(
-                new VideoMode(WindowWidth, WindowHeight),
-                WindowTitle,
-                Styles.Close);
-            window.SetMouseCursorVisible(false);
-
             var canvas = new RenderTexture(
                 ScreenWidth, ScreenHeight);
-
-            canvas.Clear(new Color(127, 127, 127));
-            DrawScaled(window, canvas);
 
             var director = new Director(LoadScriptTree());
 
@@ -59,12 +47,6 @@ namespace SpriteNovel
 
             var cursor = new Sprite(cursorTexture);
             cursor.Origin = new Vector2f((int)cursor.GetLocalBounds().Width / 2, 0);
-
-//            var choiceTests = new List<string> {
-//                "Yes, sir!",
-//                "No, sir!"
-//            };
-//            var choiceDisplay = new ChoiceDisplay(choiceTests);
 
             var choiceDisplay = new ChoiceDisplay(new List<string>());
 
@@ -83,16 +65,19 @@ namespace SpriteNovel
 						CharacterSettings[director.GetDirective("character").Value].TextColor;
 
                 if (director.Choices.Count > 0)
-                {
                     choiceDisplay = new ChoiceDisplay(director.Choices);
-                }
 
 //                if ((director.GaveDirective("music") && 
 //                audioRes.MusicDict[director.GetDirective("music").Value].Status 
 //                        != SFML.Audio.SoundStatus.Playing))
 //                    audioRes.MusicDict[director.GetDirective("music").Value].Play();
-
             };
+
+            var window = new RenderWindow(
+                new VideoMode(WindowWidth, WindowHeight),
+                WindowTitle,
+                Styles.Close);
+            window.SetMouseCursorVisible(false);
 
             window.Closed += OnClose;
             window.MouseButtonPressed += (sender, e) => {
@@ -108,8 +93,7 @@ namespace SpriteNovel
                 }
 
                 int highlighted = choiceDisplay.CheckIfAnyHighlighted(cursor.Position);
-                if (highlighted >= 0)
-                {
+                if (highlighted >= 0) {
                     audioRes.SoundDict["choose"].Play();
                     director.PlanChoice(highlighted);
                     director.AdvanceOnce();
@@ -120,12 +104,16 @@ namespace SpriteNovel
 
             AdvancementProgression();
 
-            audioRes.SoundDict["text"].Play();
+            string soundSpeed = 
+                (animatedText.TextAppearanceSpeed >= 50)
+                ? "text" : "text-slower";
+            audioRes.SoundDict[soundSpeed].Play();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             while (window.IsOpen()) {
+
                 stopwatch.Stop();
                 double elapsedTime = stopwatch.Elapsed.TotalSeconds;
                 stopwatch = Stopwatch.StartNew();
@@ -134,15 +122,13 @@ namespace SpriteNovel
 
                 animatedText.UpdateAnimation(elapsedTime);
 
-                if ((!animatedText.AnimationActive) || (animatedText.MostRecentCharacter == ','))
-                    audioRes.SoundDict["text"].Loop = false;
-                else if (!audioRes.SoundDict["text"].Loop)
-                {
-                    audioRes.SoundDict["text"].Loop = true;
-                    audioRes.SoundDict["text"].Play();
+                if ((!animatedText.AnimationActive) || 
+                    (animatedText.MostRecentCharacter == ','))
+                    audioRes.SoundDict[soundSpeed].Loop = false;
+                else if (!audioRes.SoundDict[soundSpeed].Loop) {
+                    audioRes.SoundDict[soundSpeed].Loop = true;
+                    audioRes.SoundDict[soundSpeed].Play();
                 }
-
-                director.GaveDirective("yes");
 
                 cursor.Position = window.MapPixelToCoords(Mouse.GetPosition(window));
                 cursor.Position = window.MapPixelToCoords(
@@ -169,24 +155,63 @@ namespace SpriteNovel
 
         static ScriptTree LoadScriptTree()
         {
-            Script scriptRoot = Script.Parse("n clear character=bustin music=wrunga  `Hello.` `What do you want to do today?` n `Shit on people?`");
-            Script scriptA = Script.Parse("n clear `You want to run?` `Okay, let's run.`");
-            Script scriptB = Script.Parse("n clear `Just walking?` `That's fine.` `What do you want to eat?`");
-            Script scriptBA = Script.Parse("n clear  `I'm tasty.` `This could go very well.`");
-            Script scriptBB = Script.Parse("n clear `I do like to eat you.` `That can work out.`");
+            var scripts = new Dictionary<string, Script>();
 
-            var scriptTreeRoot = new ScriptTree(scriptRoot);
-            var scriptTreeA = new ScriptTree(scriptA);
-            var scriptTreeB = new ScriptTree(scriptB);
-            var scriptTreeBA = new ScriptTree(scriptBA);
-            var scriptTreeBB = new ScriptTree(scriptBB);
+            using (Stream stream = File.OpenRead("resources/script.zip")) {
+                var reader = ReaderFactory.Open(stream);
+                while ((reader.MoveToNextEntry()) &&
+                    (!reader.Entry.IsDirectory)) {
+                    EntryStream entryStream = reader.OpenEntryStream();
+                    using (TextReader textReader = new StreamReader(entryStream))
+                    {
+                        string scriptName = Path.GetFileName(reader.Entry.FilePath);
+                        var contents = Script.Parse(textReader.ReadToEnd());
+                        scripts.Add(scriptName, contents);
+                    }
+                }
+            }
 
-            scriptTreeRoot.AddPath(new ScriptPath(scriptTreeA, "Run."));
-            scriptTreeRoot.AddPath(new ScriptPath(scriptTreeB, "Walk."));
-            scriptTreeB.AddPath(new ScriptPath(scriptTreeBA, "You."));
-            scriptTreeB.AddPath(new ScriptPath(scriptTreeBB, "Me."));
+            var scriptTrees = new Dictionary<string, ScriptTree>();
+            foreach (KeyValuePair<string, Script> s in scripts) {
+                scriptTrees.Add(s.Key, new ScriptTree(s.Value));
+            }
 
-            return scriptTreeRoot;
+            scriptTrees["common"].AddPath(new ScriptPath(
+                scriptTrees["path-A-common"], 
+                "Option 1"));
+            scriptTrees["common"].AddPath(new ScriptPath(
+                scriptTrees["path-BC-common"], 
+                "Option 2"));
+
+            scriptTrees["path-A-common"].AddPath(new ScriptPath(
+                scriptTrees["path-A-bad-ending"], 
+                "Option 1"));
+            scriptTrees["path-A-common"].AddPath(new ScriptPath(
+                scriptTrees["path-A-good-ending"], 
+                "Option 2"));
+
+            scriptTrees["path-BC-common"].AddPath(new ScriptPath(
+                scriptTrees["path-B-common"], 
+                "Option 1"));
+            scriptTrees["path-BC-common"].AddPath(new ScriptPath(
+                scriptTrees["path-C-common"], 
+                "Option 2"));
+
+            scriptTrees["path-B-common"].AddPath(new ScriptPath(
+                scriptTrees["path-B-bad-ending"], 
+                "Option 1"));
+            scriptTrees["path-B-common"].AddPath(new ScriptPath(
+                scriptTrees["path-B-good-ending"], 
+                "Option 2"));
+
+            scriptTrees["path-C-common"].AddPath(new ScriptPath(
+                scriptTrees["path-C-bad-ending"], 
+                "Option 1"));
+            scriptTrees["path-C-common"].AddPath(new ScriptPath(
+                scriptTrees["path-C-good-ending"], 
+                "Option 2"));
+
+            return scriptTrees["common"];
         }
 
         static void OnClose(object sender, EventArgs e)
