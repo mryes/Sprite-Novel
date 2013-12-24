@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using SFML.Window;
 using SFML.Graphics;
+using SFML.Window;
 using SharpCompress.Common;
 using SharpCompress.Reader;
 
@@ -23,7 +23,8 @@ namespace SpriteNovel
             { "bustin", new CharacterSetting { TextColor = new Color(215, 40, 40) } },
             { "lamber", new CharacterSetting { TextColor = new Color(60, 70, 140) } },
             { "mom",    new CharacterSetting { TextColor = Color.Blue } },
-            { "dad",    new CharacterSetting { TextColor = Color.Blue } } };
+            { "dad",    new CharacterSetting { TextColor = Color.Blue } },
+            { "none",   new CharacterSetting { TextColor = Color.Black } }, };
 
         public static void Start()
         {
@@ -67,10 +68,10 @@ namespace SpriteNovel
                 if (director.Choices.Count > 0)
                     choiceDisplay = new ChoiceDisplay(director.Choices);
 
-//                if ((director.GaveDirective("music") && 
-//                audioRes.MusicDict[director.GetDirective("music").Value].Status 
-//                        != SFML.Audio.SoundStatus.Playing))
-//                    audioRes.MusicDict[director.GetDirective("music").Value].Play();
+                if ((director.GaveDirective("music") && 
+                audioRes.MusicDict[director.GetDirective("music").Value].Status 
+                        != SFML.Audio.SoundStatus.Playing))
+                    audioRes.MusicDict[director.GetDirective("music").Value].Play();
             };
 
             var window = new RenderWindow(
@@ -78,6 +79,8 @@ namespace SpriteNovel
                 WindowTitle,
                 Styles.Close);
             window.SetMouseCursorVisible(false);
+
+            var historyDisplay = new HistoryDisplay(director.FlatScript, window);
 
             window.Closed += OnClose;
             window.MouseButtonPressed += (sender, e) => {
@@ -123,7 +126,7 @@ namespace SpriteNovel
                 animatedText.UpdateAnimation(elapsedTime);
 
                 if ((!animatedText.AnimationActive) || 
-                    (animatedText.MostRecentCharacter == ','))
+                    animatedText.OnPauseCharacter())
                     audioRes.SoundDict[soundSpeed].Loop = false;
                 else if (!audioRes.SoundDict[soundSpeed].Loop) {
                     audioRes.SoundDict[soundSpeed].Loop = true;
@@ -136,9 +139,12 @@ namespace SpriteNovel
 
                 choiceDisplay.CheckIfAnyHighlighted(cursor.Position);
 
+                historyDisplay.Update(director.FlatScript);
+
                 canvas.Clear(Color.Black);
                 canvas.Draw(textbox);
                 canvas.Draw(choiceDisplay);
+                canvas.Draw(historyDisplay);
                 canvas.Draw(cursor);
                 DrawScaled(window, canvas);
             }

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFML.Window;
 using SFML.Graphics;
+using SFML.Window;
 
 namespace SpriteNovel
 {
@@ -208,14 +208,14 @@ namespace SpriteNovel
                             AddCharacter();
                             // Add multiple characters, if appearance speed calls for it
                             while (((timeUntilNextCharacter + (1 / TextAppearanceSpeed)) < 0) &&
-                                (MostRecentCharacter != ',')) {
+                                OnPauseCharacter()) {
                                 timeUntilNextCharacter += (1 / TextAppearanceSpeed);
                                 AddCharacter();
                             }
                         } else AnimationActive = false;
                         timeUntilNextCharacter = (1 / TextAppearanceSpeed) 
-                                                 + ((MostRecentCharacter != ',') ? timeUntilNextCharacter : 0);
-                        if (MostRecentCharacter == ',')
+                                                 + (OnPauseCharacter() ? timeUntilNextCharacter : 0);
+                        if (OnPauseCharacter())
                             timeUntilNextCharacter *= commaPause;
                     }
                 } else SkipAnimation();
@@ -245,11 +245,16 @@ namespace SpriteNovel
             invisibleCharacters = FullText.EndPosition + 1;
         }
 
+        public bool OnPauseCharacter()
+        {
+            return pauseCharacters.Contains(MostRecentCharacter);
+        }
+
         readonly int textboxRows = 4;
         int invisibleCharacters;
         double timeUntilNextCharacter;
 
-        readonly char[] pauseCharacters = { '.', '!', '?', ',' };
+        readonly char[] pauseCharacters = { ',', ';', '–', '-' };
         readonly double commaPause = 15;
 
         void AddCharacter()
@@ -276,6 +281,8 @@ namespace SpriteNovel
                 FullText.RemoveLine(0);
             }	
         }
+
+
     }
 
     class Textbox : Drawable
@@ -317,4 +324,6 @@ namespace SpriteNovel
         static readonly Texture boxTexture  = new Texture("resources/textbox.png");
         readonly Sprite boxSprite;
     }
+
+
 }

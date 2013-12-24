@@ -15,6 +15,22 @@ namespace SpriteNovel
     {
         public static readonly string DirectiveNotFoundError = "Directive Not Found";
         public List<AdvancementDirective> CurrentDirectives;
+        public Script FlatScript
+        {
+            get {
+                var oldDirectives = CurrentDirectives;
+                var flatScript = new Script();
+                for (var node = scriptTree; node != null; node = node.Parent)
+                    for (int i = (node == scriptTree) ? currentAdvancementNum : node.Script.Count - 1; i >= 0; --i) {
+                        CurrentDirectives = node.Script[i].Directives;
+                        CopyPersistingDirectives();
+                        flatScript.Add(node.Script[i]);
+                }
+                CurrentDirectives = oldDirectives;
+                flatScript.Reverse();
+                return flatScript;
+            }
+        }
 
         public List<string> Choices {
             get {
