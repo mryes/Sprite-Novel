@@ -10,9 +10,10 @@ namespace SpriteNovel
             {"text",        new Sound(new SoundBuffer("resources/audio/text-normal.wav"))},
             {"text-slower", new Sound(new SoundBuffer("resources/audio/text-slower.wav"))},
             {"advance",     new Sound(new SoundBuffer("resources/audio/advance.wav"))},
-            {"choose",      new Sound(new SoundBuffer("resources/audio/choose.wav"))} };
+            {"choose",      new Sound(new SoundBuffer("resources/audio/choose.wav"))},
+            {"history",     new Sound(new SoundBuffer("resources/audio/history.wav"))} };
 
-        public readonly Dictionary<string, Music> MusicDict 
+        public readonly Dictionary<string, Music> MusicDict
             = new Dictionary<string, Music> {
             {"wrunga",  new Music("resources/audio/wrunga.ogg")},
             {"butadog", new Music("resources/audio/butadog.ogg")} };

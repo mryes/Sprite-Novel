@@ -24,7 +24,7 @@ namespace SpriteNovel
             { "lamber", new CharacterSetting { TextColor = new Color(60, 70, 140) } },
             { "mom",    new CharacterSetting { TextColor = Color.Blue } },
             { "dad",    new CharacterSetting { TextColor = Color.Blue } },
-            { "none",   new CharacterSetting { TextColor = Color.Black } }, };
+            { "none",   new CharacterSetting { TextColor = Color.Black } } };
 
         public static void Start()
         {
@@ -50,6 +50,8 @@ namespace SpriteNovel
             cursor.Origin = new Vector2f((int)cursor.GetLocalBounds().Width / 2, 0);
 
             var choiceDisplay = new ChoiceDisplay(new List<string>());
+
+            var historyDisplay = new HistoryDisplay();
 
             Action AdvancementProgression = () => {
 
@@ -80,28 +82,36 @@ namespace SpriteNovel
                 Styles.Close);
             window.SetMouseCursorVisible(false);
 
-            var historyDisplay = new HistoryDisplay(director.FlatScript, window);
+            window.MouseWheelMoved += (sender, e) => {
+                if ((!historyDisplay.Active) && (e.Delta > 0))
+                    audioRes.SoundDict["history"].Play();
+            };
+
+            historyDisplay = new HistoryDisplay(director.FlatScript, window);
 
             window.Closed += OnClose;
-            window.MouseButtonPressed += (sender, e) => {
-                if ((Mouse.GetPosition(window).Y / ScreenScale) >= Textbox.Position.Y) {
-                    if ((!animatedText.AnimationActive) &&
-                        (director.AdvanceOnce() == DirectorAdvancementStatus.Success)) {
-                        audioRes.SoundDict["advance"].Play();
-                        AdvancementProgression();
-                    } else {
-                        if (animatedText.AnimationActive) audioRes.SoundDict["advance"].Play();
-                        animatedText.SkipAnimation();
-                    }
-                }
 
-                int highlighted = choiceDisplay.CheckIfAnyHighlighted(cursor.Position);
-                if (highlighted >= 0) {
-                    audioRes.SoundDict["choose"].Play();
-                    director.PlanChoice(highlighted);
-                    director.AdvanceOnce();
-                    choiceDisplay.Deactivate();
-                    AdvancementProgression();
+            window.MouseButtonPressed += (sender, e) => {
+                if (!historyDisplay.Active) {
+                    if ((Mouse.GetPosition(window).Y / ScreenScale) >= Textbox.Position.Y) {
+                        if ((!animatedText.AnimationActive) &&
+                            (director.AdvanceOnce() == DirectorAdvancementStatus.Success)) {
+                            audioRes.SoundDict["advance"].Play();
+                            AdvancementProgression();
+                        } else {
+                            if (animatedText.AnimationActive) audioRes.SoundDict["advance"].Play();
+                            animatedText.SkipAnimation();
+                        }
+                    }
+
+                    int highlighted = choiceDisplay.CheckIfAnyHighlighted(cursor.Position);
+                    if (highlighted >= 0) {
+                        audioRes.SoundDict["choose"].Play();
+                        director.PlanChoice(highlighted);
+                        director.AdvanceOnce();
+                        choiceDisplay.Deactivate();
+                        AdvancementProgression();
+                    }
                 }
             };
 

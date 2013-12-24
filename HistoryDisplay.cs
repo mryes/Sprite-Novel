@@ -16,14 +16,20 @@ namespace SpriteNovel
 
         public Script SessionScript { get; private set; }
 
+        public HistoryDisplay()
+        {
+            SessionScript = new Script();
+            Active = false;
+        }
+
         public HistoryDisplay(Script flatScript, Window window)
         {
             SessionScript = flatScript;
 
             Active = false;
 
-            window.MouseButtonPressed += (sender, e) => Active = false;
-            window.MouseWheelMoved    += UpdateScrollPosition;
+            window.MouseWheelMoved += UpdateScrollPosition;
+            window.KeyPressed += (sender, e) => Active = false;
         }
 
         public void Update(Script flatScript)
@@ -57,7 +63,11 @@ namespace SpriteNovel
 
                     ++lineNumWithinBlock;
                 }
+
+                yPosition -= spaceBetweenLines;
             } 
+
+
         }
 
         public void UpdateScrollPosition(object sender, EventArgs e)
@@ -84,12 +94,11 @@ namespace SpriteNovel
                     lines += block.Text.Strings.Count;
 
                 if (args.Delta > 0){
-                    if ((lines - currentBottom) + 1 <= NumberOfLines)
+                    if ((lines + textBlocks.Count - currentBottom) + 1 <= NumberOfLines)
                         currentBottom -= args.Delta;
                     if (currentBottom < 1)
                         currentBottom = 1;
                 }
-
             }
         }
 
@@ -161,6 +170,8 @@ namespace SpriteNovel
             }
 
         }
+
+        readonly int spaceBetweenParagraphs = 5;
 
         List<TextBlock> textBlocks = new List<TextBlock>();
         List<Text> drawableTextLines = new List<Text>();

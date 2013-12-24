@@ -168,7 +168,7 @@ namespace SpriteNovel
             get { return fullText; } 
 
             set {
-                if (!AnimationActive)
+                //if (!AnimationActive)
                     fullText = value;
             }
         }
